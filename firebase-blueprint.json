@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Información recolectada de los usuarios interesados en la guía.",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string",
+          "description": "Nombre y apellido del usuario"
+        },
+        "occupation": {
+          "type": "string",
+          "description": "¿A qué se dedican?"
+        },
+        "automationGoal": {
+          "type": "string",
+          "description": "Problema que les gustaría automatizar con IA"
+        },
+        "costlyProblem": {
+          "type": "string",
+          "description": "Problema que más dinero les cuesta"
+        },
+        "investmentBudget": {
+          "type": "string",
+          "description": "Presupuesto dispuesto a invertir"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Fecha de creación"
+        }
+      },
+      "required": ["fullName", "occupation", "automationGoal", "costlyProblem", "investmentBudget", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Colección de leads recolectados"
+    }
+  }
+}

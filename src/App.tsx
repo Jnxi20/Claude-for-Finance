@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Zap, 
   Database, 
@@ -17,8 +17,12 @@ import {
   AlertCircle, 
   ArrowRight,
   ChevronRight,
-  FileText
+  FileText,
+  Lock,
+  Loader2
 } from "lucide-react";
+import { db } from "./firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const Section = ({ id, title, children, number }: { id: string; title: string; children: React.ReactNode; number: string }) => (
   <motion.section 
@@ -38,6 +42,155 @@ const Section = ({ id, title, children, number }: { id: string; title: string; c
 );
 
 export default function App() {
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    occupation: "",
+    automationGoal: "",
+    costlyProblem: "",
+    investmentBudget: ""
+  });
+
+  // Check if user already submitted (local storage for UX)
+  useEffect(() => {
+    const access = localStorage.getItem("claude_guide_access");
+    if (access === "true") {
+      setHasAccess(true);
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await addDoc(collection(db, "leads"), {
+        ...formData,
+        createdAt: serverTimestamp()
+      });
+      
+      localStorage.setItem("claude_guide_access", "true");
+      setHasAccess(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      console.error("Error saving lead:", error);
+      alert("Hubo un error al guardar tus datos. Por favor intenta de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-100"
+        >
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+              <Lock size={32} />
+            </div>
+          </div>
+          
+          <h1 className="text-3xl font-black text-primary text-center mb-4">Acceso a la Guía</h1>
+          <p className="text-slate-500 text-center mb-10 leading-relaxed">
+            Para acceder a la guía completa de Claude para Finanzas por Juan Cruz Robles Collazo, por favor responde estas breves preguntas.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Nombre y Apellido</label>
+              <input 
+                required
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                placeholder="Ej: Juan Pérez"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿A qué te dedicas?</label>
+              <input 
+                required
+                name="occupation"
+                value={formData.occupation}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                placeholder="Ej: Analista de Inversiones"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Qué problema te gustaría automatizar con IA?</label>
+              <textarea 
+                required
+                name="automationGoal"
+                value={formData.automationGoal}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
+                placeholder="Describe el proceso que quieres mejorar..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Qué problema te está costando más dinero hoy?</label>
+              <textarea 
+                required
+                name="costlyProblem"
+                value={formData.costlyProblem}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
+                placeholder="El cuello de botella financiero actual..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Cuánto invertirías para resolverlo?</label>
+              <input 
+                required
+                name="investmentBudget"
+                value={formData.investmentBudget}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                placeholder="Ej: $5,000 - $10,000 USD"
+              />
+            </div>
+
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin" size={20} />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  Desbloquear Guía
+                  <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -46,14 +199,9 @@ export default function App() {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold text-sm">J</div>
           <span className="font-bold text-primary tracking-tight hidden sm:inline">Juan Cruz Robles Collazo</span>
         </div>
-        <a 
-          href="https://api.leadconnectorhq.com/widget/form/u14ablepBx9OAxIPaFap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-primary text-white px-4 py-2 rounded-full text-xs font-bold hover:scale-105 transition-transform"
-        >
-          Agendar Consultoría
-        </a>
+        <div className="flex items-center gap-4">
+          <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded uppercase tracking-widest">Acceso Completo</span>
+        </div>
       </header>
 
       {/* Hero */}
@@ -306,45 +454,6 @@ export default function App() {
         </footer>
 
       </main>
-
-      {/* CTA Section */}
-      <section className="bg-slate-50 py-24 px-6 border-t border-slate-100">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto text-center"
-        >
-          <h2 className="text-3xl md:text-5xl font-black text-primary mb-6">
-            ¿Buscando aplicar IA en tu negocio?
-          </h2>
-          <p className="text-lg text-slate-500 mb-10 leading-relaxed">
-            Agenda una llamada de consultoría estratégica conmigo y optimicemos tus procesos financieros hoy mismo.
-          </p>
-          <a 
-            href="https://api.leadconnectorhq.com/widget/form/u14ablepBx9OAxIPaFap"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-primary text-white px-8 py-4 rounded-full text-lg font-bold hover:scale-105 transition-all shadow-xl shadow-primary/20"
-          >
-            <Calendar size={20} />
-            Agendar Consultoría
-            <ArrowRight size={20} />
-          </a>
-        </motion.div>
-      </section>
-
-      {/* Mobile Nav Helper */}
-      <div className="fixed bottom-6 right-6 sm:hidden z-50">
-        <a 
-          href="https://api.leadconnectorhq.com/widget/form/u14ablepBx9OAxIPaFap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
-        >
-          <Calendar size={24} />
-        </a>
-      </div>
     </div>
   );
 }

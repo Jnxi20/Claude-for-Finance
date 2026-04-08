@@ -1,0 +1,28 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll(['fullName', 'occupation', 'automationGoal', 'costlyProblem', 'investmentBudget', 'createdAt']) &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 200 &&
+             data.occupation is string && data.occupation.size() > 0 && data.occupation.size() < 500 &&
+             data.automationGoal is string && data.automationGoal.size() > 0 && data.automationGoal.size() < 2000 &&
+             data.costlyProblem is string && data.costlyProblem.size() > 0 && data.costlyProblem.size() < 2000 &&
+             data.investmentBudget is string && data.investmentBudget.size() > 0 && data.investmentBudget.size() < 500;
+    }
+
+    match /leads/{leadId} {
+      // Allow anyone to create a lead (public form)
+      allow create: if isValidLead(request.resource.data);
+      
+      // Only admin can read leads
+      allow read, list: if isAuthenticated() && 
+        (request.auth.token.email == "rc.juanchi@gmail.com" && request.auth.token.email_verified == true);
+      
+      allow update, delete: if false;
+    }
+  }
+}
