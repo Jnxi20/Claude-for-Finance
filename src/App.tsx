@@ -114,57 +114,57 @@ export default function App() {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                placeholder="Ej: Juan Pérez"
+                placeholder="Tu nombre completo"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿A qué te dedicas?</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿A qué se dedican?</label>
               <input 
                 required
                 name="occupation"
                 value={formData.occupation}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                placeholder="Ej: Analista de Inversiones"
+                placeholder="Tu cargo o sector"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Qué problema te gustaría automatizar con IA?</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Si pudieras resolver/automatizar un problema de tu empresa con IA cual seria?</label>
               <textarea 
                 required
                 name="automationGoal"
                 value={formData.automationGoal}
                 onChange={handleInputChange}
-                rows={3}
+                rows={4}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
-                placeholder="Describe el proceso que quieres mejorar..."
+                placeholder="Cuéntanos en detalle qué proceso te gustaría mejorar..."
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Qué problema te está costando más dinero hoy?</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Cual es el problema que mas dinero te esta costando en tu empresa que te gustaria resolver con IA?</label>
               <textarea 
                 required
                 name="costlyProblem"
                 value={formData.costlyProblem}
                 onChange={handleInputChange}
-                rows={3}
+                rows={4}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm resize-none"
-                placeholder="El cuello de botella financiero actual..."
+                placeholder="Describe el cuello de botella financiero..."
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">¿Cuánto invertirías para resolverlo?</label>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Cuanto dinero estas dispuesto a invertir para resolver este problema?</label>
               <input 
                 required
                 name="investmentBudget"
                 value={formData.investmentBudget}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                placeholder="Ej: $5,000 - $10,000 USD"
+                placeholder="Ej: $5,000 - $15,000 USD"
               />
             </div>
 
